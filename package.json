@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/kaiihayes/CMPS415Project/issues"
   },
-  "homepage": "https://github.com/kaiihayes/CMPS415Project#readme"
+  "homepage": "https://github.com/kaiihayes/CMPS415Project#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2"
+  }
 }
