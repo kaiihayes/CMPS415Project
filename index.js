@@ -17,8 +17,8 @@ async function run() {
     const tickets = database.collection('tickets');
 
     // Query for a ID
-    const query = {priority: 'high'};
-    const ticket = await tickets.findOne(query);
+    const query = {assignee_id: 435678};
+    const ticket = await tickets.find(query).toArray();
 
     console.log("Found your ticket(s) from your database!");
     console.log("");
