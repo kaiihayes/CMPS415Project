@@ -95,6 +95,89 @@ async function writeTicket(ticket) {
   }
 }
 
+async function updateTicket(ticket) {
+  const tickets = getTickets();
+
+  const validationResult = validateTicket(ticket);
+
+  if (validationResult.hasErrors) {
+    return Promise.resolve({
+      data: "",
+      validationResult: validationResult,
+    });
+  }
+
+  const ticketIndex = tickets.findIndex((t) => t.id === ticket.id);
+  if (ticketIndex === -1) {
+    return Promise.resolve({
+      data: "",
+      validationResult: {
+        hasErrors: true,
+        errorMessages: [`Ticket with id ${ticket.id} not found`],
+      },
+    });
+  }
+
+  const updatedTicket = {
+    ...tickets[ticketIndex],
+    ...ticket,
+    updated_at: new Date().toISOString(),
+  };
+  tickets[ticketIndex] = updatedTicket;
+
+  const updatedContent = JSON.stringify(tickets, null, 2);
+  try {
+    fs.writeFileSync(path.resolve(__dirname, filePath), updatedContent);
+    return Promise.resolve({
+      data: JSON.stringify(updatedTicket, null, 2),
+    });
+  } catch (err) {
+    console.log(err);
+    return Promise.resolve({
+      data: "",
+      validationResult: {
+        hasErrors: true,
+        errorMessages: ["Failed to update ticket in file"],
+      },
+    });
+  }
+}
+
+async function deleteTicket(ticket) {
+  const tickets = getTickets();
+
+  const ticketIndex = tickets.findIndex((t) => t.id === ticket.id);
+  if (ticketIndex === -1) {
+    return Promise.resolve({
+      data: "",
+      validationResult: {
+        hasErrors: true,
+        errorMessages: [`Ticket with id ${ticket.id} not found`],
+      },
+    });
+  }
+
+  tickets.splice(ticketIndex, 1);
+
+  const updatedContent = JSON.stringify(tickets, null, 2);
+  try {
+    fs.writeFileSync(path.resolve(__dirname, filePath), updatedContent);
+    return Promise.resolve({
+      data: "",
+    });
+  } catch (err) {
+    console.log(err);
+    return Promise.resolve({
+      data: "",
+      validationResult: {
+        hasErrors: true,
+        errorMessages: ["Failed to delete ticket from file"],
+      },
+    });
+  }
+}
+
+
 router.get("/rest/list", function(req, res) {
   const tickets = getTickets();
 
@@ -123,6 +206,53 @@ router.get("/rest/ticket/:id", function(req, res) {
   return ticket
     ? res.status(200).send(JSON.stringify(ticket, null, 2))
     : res.status(404).send(`Ticket with id ${req.params.id} not found.`);
+});
+
+router.put('/rest/ticket/:id', async function(req, res) {
+  const tickets = getTickets();
+  const ticketIndex = tickets.findIndex(function(x) {
+    return x.id === Number(req.params.id);
+  });
+
+  if (ticketIndex === -1) {
+    return res.status(404).send(`Ticket with id ${req.params.id} not found.`);
+  }
+
+  const updatedTicket = { ...tickets[ticketIndex], ...req.body };
+  const response = await updateTicket(updatedTicket);
+
+  if (response.validationResult?.hasErrors) {
+    return res
+      .status(400)
+      .send(JSON.stringify(response.validationResult.errorMessages, null, 2));
+  }
+
+  tickets[ticketIndex] = updatedTicket;
+
+  return res.status(200).send(JSON.stringify(updatedTicket, null, 2));
+});
+
+router.delete('/rest/ticket/:id', async function(req, res) {
+  const tickets = getTickets();
+  const ticketIndex = tickets.findIndex(function(x) {
+    return x.id === Number(req.params.id);
+  });
+
+  if (ticketIndex === -1) {
+    return res.status(404).send(`Ticket with id ${req.params.id} not found.`);
+  }
+
+  const response = await deleteTicket(tickets[ticketIndex]);
+
+  if (response.validationResult?.hasErrors) {
+    return res
+      .status(400)
+      .send(JSON.stringify(response.validationResult.errorMessages, null, 2));
+  }
+
+  tickets.splice(ticketIndex, 1);
+
+  return res.status(204).send();
 });
 
 module.exports = { TicketsController: router };
