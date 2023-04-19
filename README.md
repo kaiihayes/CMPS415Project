@@ -30,3 +30,17 @@ This endpoint requires a JSON object to be sent to the web app. This object will
 
 object of the ticket that was created.
 
+
+Phase 2:
+
+- This purpose of this phase is to extend the services created in Phase I. The extension will require the addition of a database to store the tickets. Two additional endpoints will need to be developed to update and delete tickets.
+
+You should use a database solution provided by Render.com. You may consider the following: https://devcenter.heroku.com/articles/mean-apps-restful-api#provision-a-mongodb-database
+
+Summary of Deliverables
+Node Web Service using Node that offers 5 endpoints.
+• DELETE - /rest/ticket/id = ”Deletes a ticket record by ID”
+• PUT - /rest/ticket/id = ”Updates exsisting ticket record based on ID”
+![image](https://user-images.githubusercontent.com/75281930/233196024-2fbbb6fa-40c9-4221-b36f-fc9a988012ac.png)
+
+
